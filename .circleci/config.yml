@@ -54,16 +54,16 @@ jobs:
       - run:
           name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
           command: sudo chmod +x ./android/gradlew
-      - run:
-          name: Download Dependencies
-          command: cd android && ./gradlew androidDependencies --debug
+      # - run:
+      #     name: Download Dependencies
+      #     command: cd android && ./gradlew androidDependencies --debug
       - save_cache:
           paths:
             - ~/.gradle
           key: jars-{{ checksum "android/build.gradle" }}-{{ checksum  "android/build.gradle" }}
-      - run:
-          name: Copy configuration files
-          command: cp config/Android/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
+      # - run:
+      #     name: Copy configuration files
+      #     command: cp config/Android/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
       - run: # https://developer.android.com/studio/build/building-cmdline This creates an APK named module_name-debug.apk in project_name/module_name/build/outputs/apk/
           name: Build debug APK and release APK
           command: |
