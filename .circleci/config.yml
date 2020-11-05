@@ -30,7 +30,7 @@ jobs:
       - run: sudo yarn global add ionic
       - run: ionic build
       # - run: npx cap add android
-      - run: npx cap sync
+      - run: npx cap sync android
       - persist_to_workspace:
           root: android
           paths:
@@ -54,9 +54,9 @@ jobs:
       - run:
           name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
           command: sudo chmod +x ./android/gradlew
-      # - run:
-      #     name: Download Dependencies
-      #     command: cd android && ./gradlew androidDependencies --debug
+      - run:
+          name: Download Dependencies
+          command: cd android && ./gradlew androidDependencies --debug
       - save_cache:
           paths:
             - ~/.gradle
