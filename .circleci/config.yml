@@ -37,7 +37,7 @@ jobs:
             - ./*
   build_android:
     docker:
-      - image: circleci/android:api-29-node
+      - image: circleci/android:api-26-node
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
