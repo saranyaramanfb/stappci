@@ -38,25 +38,35 @@ jobs:
 
   build_android:
     docker:
-      - image: circleci/android:api-26-node
-    environment:
-      JVM_OPTS: -Xmx3200m
-    steps:
-      - checkout
-      - attach_workspace:
-          # Must be absolute path or relative path from working_directory
-          at: android
-      - run: sudo yarn global add ionic
-      - run: ionic build
-      # - run: npx cap add android
-      - run: npx cap sync android
-      - restore_cache:
-          name: Restore Node Modules Cache
-          keys:
-            - yarn-modules-{{ checksum "yarn.lock" }}
-      - restore_cache:
-          key: jars-{{ checksum "android/build.gradle" }}-{{ checksum  "android/build.gradle" }}
-      - run:
+        - image: circleci/android:api-28-node
+      working_directory: ~/repo
+      environment:
+        JVM_OPTS: -Xmx3200m
+      steps:
+        - checkout
+        - run: 
+            name: "Install gradle"
+            command: |
+              wget https://services.gradle.org/distributions/gradle-4.0.2-bin.zip -P /tmp
+              sudo unzip -d /opt/gradle /tmp/gradle-*.zip
+              echo 'export GRADLE_HOME=/opt/gradle/gradle-4.0.2' >> $BASH_ENV
+              echo 'export PATH=$PATH:/opt/gradle/gradle-4.0.2/bin' >> $BASH_ENV
+              source $BASH_ENV
+        - run:
+            name: "Install ionic and cordova"
+            command: |
+              sudo npm install -g ionic cordova yarn
+        - run:
+            name: "Install npm packages"
+            command: |
+              yarn install
+        - run:
+            name: "Install Cordova plugins and add android platform"
+            command: |
+              - run: ionic build
+              # - run: npx cap add android
+              - run: npx cap sync android
+        - run:
           name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
           command: sudo chmod +x ./android/gradlew
       - run:
