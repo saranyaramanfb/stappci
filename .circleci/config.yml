@@ -29,7 +29,7 @@ jobs:
             - node_modules
       - run: sudo yarn global add ionic
       - run: ionic build
-      # - run: npx cap add android
+      - run: npx cap add android
       - run: npx cap sync android
       - persist_to_workspace:
           root: android
@@ -39,7 +39,7 @@ jobs:
   
   build_android:
     docker:
-      - image: circleci/android:api-26-node
+      - image: circleci/android:api-28-node
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
@@ -47,10 +47,18 @@ jobs:
       - attach_workspace:
           # Must be absolute path or relative path from working_directory
           at: android
-      - run: sudo npm install -g @ionic/cli
-      - run: ionic build
+      # - run: sudo npm install -g @ionic/cli
+      # - run: ionic build
       # - run: npx cap add android
-      - run: npx cap sync android
+      # - run: npx cap sync android
+      - run: 
+            name: "Install gradle"
+            command: |
+              wget https://services.gradle.org/distributions/gradle-4.0.2-bin.zip -P /tmp
+              sudo unzip -d /opt/gradle /tmp/gradle-*.zip
+              echo 'export GRADLE_HOME=/opt/gradle/gradle-4.0.2' >> $BASH_ENV
+              echo 'export PATH=$PATH:/opt/gradle/gradle-4.0.2/bin' >> $BASH_ENV
+              source $BASH_ENV
       - run:
           name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
           command: sudo chmod +x ./android/gradlew
