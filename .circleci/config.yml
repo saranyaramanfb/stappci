@@ -36,72 +36,57 @@ jobs:
           paths:
             - ./*
 
+  
   build_android:
     docker:
-        - image: circleci/android:api-26-node
-      working_directory: ~/repo
-      environment:
-        JVM_OPTS: -Xmx3200m
+      - image: circleci/android:api-26-node
+    environment:
+      JVM_OPTS: -Xmx3200m
     steps:
       - checkout
-      - run: 
-          name: "Install gradle"
-          command: |
-            wget https://services.gradle.org/distributions/gradle-4.0.2-bin.zip -P /tmp
-            sudo unzip -d /opt/gradle /tmp/gradle-*.zip
-            echo 'export GRADLE_HOME=/opt/gradle/gradle-4.0.2' >> $BASH_ENV
-            echo 'export PATH=$PATH:/opt/gradle/gradle-4.0.2/bin' >> $BASH_ENV
-            source $BASH_ENV
+      - attach_workspace:
+          # Must be absolute path or relative path from working_directory
+          at: android
+      - run: sudo npm install -g @ionic/cli
+      - run: ionic build
+      # - run: npx cap add android
+      - run: npx cap sync android
       - run:
-          name: "Install ionic and cordova"
-          command: |
-            sudo npm install -g ionic cordova yarn
+          name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
+          command: sudo chmod +x ./android/gradlew
       - run:
-          name: "Install npm packages"
-          command: |
-            yarn install
-      - run:
-          name: "Install Cordova plugins and add android platform"
-          command: |
-            - run: ionic build
-            # - run: npx cap add android
-            - run: npx cap sync android
-      - run:
-        name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
-        command: sudo chmod +x ./android/gradlew
-      - run:
-        name: Download Dependencies
-        command: cd android && ./gradlew androidDependencies --debug
+          name: Download Dependencies
+          command: cd android && ./gradlew androidDependencies --debug
       - save_cache:
-        paths:
-          - ~/.gradle
-        key: jars-{{ checksum "android/build.gradle" }}-{{ checksum  "android/build.gradle" }}
-    # - run:
-    #     name: Copy configuration files
-    #     command: cp config/Android/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum "android/build.gradle" }}-{{ checksum  "android/build.gradle" }}
+      # - run:
+      #     name: Copy configuration files
+      #     command: cp config/Android/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
       - run: # https://developer.android.com/studio/build/building-cmdline This creates an APK named module_name-debug.apk in project_name/module_name/build/outputs/apk/
-        name: Build debug APK and release APK
-        command: |
-          cd android
-          ./gradlew :app:assembleDebug
-          ./gradlew :app:assembleRelease
-          ./gradlew :app:assembleDebugAndroidTest
+          name: Build debug APK and release APK
+          command: |
+            cd android
+            ./gradlew :app:assembleDebug
+            ./gradlew :app:assembleRelease
+            ./gradlew :app:assembleDebugAndroidTest
       - run:
-        name: Run Tests
-        command: cd android && ./gradlew lint test
+          name: Run Tests
+          command: cd android && ./gradlew lint test
       - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
-        path: android/app/build/reports
-        destination: reports
+          path: android/app/build/reports
+          destination: reports
       - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
-        path: android/app/build/outputs/apk
+          path: android/app/build/outputs/apk
       # - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
       #     path: android/app/src/main/assets/public
       #- store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
       #    path: android/app/build/test-results
       - persist_to_workspace:
-        root: android/app/build/outputs
-        paths:
-          - ./apk/*
+          root: android/app/build/outputs
+          paths:
+            - ./apk/*
 
   publish-github-release:
     docker:
