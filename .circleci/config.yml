@@ -4,6 +4,7 @@ workflows:
   build-test-and-deploy:
     jobs:
       - build_android
+      -publish-github-release
 
   jobs:
   build_android:
