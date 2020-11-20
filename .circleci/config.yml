@@ -21,19 +21,20 @@ version: 2
             command: |
               sudo npm install -g ionic cordova yarn
         - run:
-            name: "Install npm packages"
+            name: "Install npm packages and build project"
             command: |
-              yarn install
+              npm install
+              ionic build
         - run:
-            name: "Install Cordova plugins and add android platform"
+            name: "Add android project"
             command: |
-              ionic cordova platform add android --noresources
-              ionic config set -g telemetry true
+              npx cap add android
+              npx cap sync android
         - run:
             name: "Generate apk"
             command: |
-              ionic cordova build android --verbose
-              mkdir -p /tmp/apk
+              cd android
+              ./gradlew :app:assembleDebug
               cp -r platforms/android/app/build/outputs/apk/debug/app-debug.apk /tmp/apk
         - store_artifacts:
             path: /tmp/apk
