@@ -10,16 +10,11 @@ jobs:
       - attach_workspace:
           # Must be absolute path or relative path from working_directory
           at: android
-      - run: sudo yarn global add ionic
+      - run: sudo npm install -g @ionic/cli
+      - run: sudo npm install -g @angular/cli
       - run: ionic build
       # - run: npx cap add android
       - run: npx cap sync android
-      - restore_cache:
-          name: Restore Node Modules Cache
-          keys:
-            - yarn-modules-{{ checksum "yarn.lock" }}
-      - restore_cache:
-          key: jars-{{ checksum "android/build.gradle" }}-{{ checksum  "android/build.gradle" }}
       - run:
           name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
           command: sudo chmod +x ./android/gradlew
