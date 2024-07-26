@@ -14,7 +14,7 @@ workflows:
 jobs:
   build_yarn:
     docker:
-      - image: circleci/node:10-browsers
+      - image: circleci/node:latest-browsers
     steps:
       - checkout
       - restore_cache:
@@ -28,7 +28,7 @@ jobs:
           paths:
             - node_modules
       - run: yarn build
-      - run: npx cap add android
+     ## - run: npx cap add android
       - run: npx cap sync
       - persist_to_workspace:
           root: android
